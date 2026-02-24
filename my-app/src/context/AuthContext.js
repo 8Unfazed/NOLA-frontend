@@ -12,8 +12,25 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     // Check if user is already logged in
     const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    const storedToken = localStorage.getItem('access_token');
+    const ts = localStorage.getItem('login_timestamp');
+    const now = Date.now();
+    const TEN_MIN = 10 * 60 * 1000; // 10 minutes in ms
+
+    if (storedUser && storedToken && ts) {
+      const age = now - parseInt(ts, 10);
+      if (age <= TEN_MIN) {
+        // restore session
+        setUser(JSON.parse(storedUser));
+        setToken(storedToken);
+      } else {
+        // expired session window — clear stored auth
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('login_timestamp');
+        setUser(null);
+        setToken(null);
+      }
     }
   }, []);
 
@@ -26,6 +43,7 @@ export const AuthProvider = ({ children }) => {
       
       localStorage.setItem('access_token', access_token);
       localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('login_timestamp', Date.now().toString());
       
       setUser(userData);
       setToken(access_token);
@@ -49,6 +67,7 @@ export const AuthProvider = ({ children }) => {
       
       localStorage.setItem('access_token', access_token);
       localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('login_timestamp', Date.now().toString());
       
       setUser(userData);
       setToken(access_token);
@@ -72,6 +91,7 @@ export const AuthProvider = ({ children }) => {
     
     localStorage.removeItem('access_token');
     localStorage.removeItem('user');
+    localStorage.removeItem('login_timestamp');
     setUser(null);
     setToken(null);
   };

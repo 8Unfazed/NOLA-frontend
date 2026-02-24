@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { professionAPI } from '../services/api';
 import '../styles/Auth.css';
 
 const DeveloperSignup = () => {
   const navigate = useNavigate();
   const { signup, loading, error } = useAuth();
+  const [professions, setProfessions] = useState([]);
   const [formData, setFormData] = useState({
     email: '',
     username: '',
@@ -17,6 +19,24 @@ const DeveloperSignup = () => {
     confirmPassword: ''
   });
   const [formError, setFormError] = useState('');
+
+  useEffect(() => {
+    fetchProfessions();
+  }, []);
+
+  const fetchProfessions = async () => {
+    try {
+      const response = await professionAPI.getAllProfessions();
+      setProfessions(response.data.professions || []);
+    } catch (error) {
+      console.error('Error fetching professions:', error);
+      // Fallback to default professions if API fails
+      setProfessions([
+        { id: 1, name: 'Software Developer' },
+        { id: 2, name: 'Data Analyst' }
+      ]);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -117,15 +137,20 @@ const DeveloperSignup = () => {
 
           <div className="form-group">
             <label htmlFor="profession">Profession</label>
-            <input
-              type="text"
+            <select
               id="profession"
               name="profession"
               value={formData.profession}
               onChange={handleChange}
-              placeholder="e.g. Full Stack Developer, UI Designer"
               required
-            />
+            >
+              <option value="">Select a profession</option>
+              {professions.map(prof => (
+                <option key={prof.id} value={prof.name}>
+                  {prof.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="form-group">

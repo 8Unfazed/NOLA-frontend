@@ -13,6 +13,9 @@ import BusinessDashboard from './pages/BusinessDashboard';
 import DeveloperDashboard from './pages/DeveloperDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import BusinessProfile from './pages/BusinessProfile';
+import ImproveSkill from './pages/ImproveSkill';
+import AdminProfessionManagement from './pages/AdminProfessionManagement';
+import ProfessionContent from './pages/ProfessionContent';
 
 import './App.css';
 
@@ -48,6 +51,24 @@ function App() {
             }
           />
 
+          <Route
+            path="/improve-skill"
+            element={
+              <ProtectedRoute allowedRoles={['developer']}>
+                <ImproveSkill />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/profession-content"
+            element={
+              <ProtectedRoute allowedRoles={['developer']}>
+                <ProfessionContent />
+              </ProtectedRoute>
+            }
+          />
+
           {/* Business Profile - Accessible by Developers */}
           <Route
             path="/business-profile/:id"
@@ -64,6 +85,15 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['admin']}>
                 <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/profession-management"
+            element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <AdminProfessionManagement />
               </ProtectedRoute>
             }
           />

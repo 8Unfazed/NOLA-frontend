@@ -26,6 +26,26 @@ const BusinessDashboard = () => {
     } else if (activeTab === 'jobs') {
       fetchJobs();
     }
+    // when applicants tab is active, poll for updates every 10s
+    let pollId;
+    if (activeTab === 'applicants') {
+      pollId = setInterval(() => {
+        fetchApplicants();
+      }, 10000);
+    }
+
+    // when jobs tab active, poll for job updates
+    let jobsPoll;
+    if (activeTab === 'jobs') {
+      jobsPoll = setInterval(() => {
+        fetchJobs();
+      }, 10000);
+    }
+
+    return () => {
+      if (pollId) clearInterval(pollId);
+      if (jobsPoll) clearInterval(jobsPoll);
+    };
   }, [activeTab]);
 
   const fetchBusinessProfile = async () => {
@@ -60,9 +80,13 @@ const BusinessDashboard = () => {
     setLoading(true);
     try {
       const response = await clientAPI.getApplicants(user?.id);
-      setApplicants(response.data.developers || []);
+      // backend now returns { applicants_by_job: [...] }
+      const data = response.data || {};
+      console.log('GET /client/:id/applicants response:', data);
+      setApplicants(data.applicants_by_job || []);
     } catch (error) {
       console.error('Error fetching applicants:', error);
+      setApplicants([]);
     } finally {
       setLoading(false);
     }
@@ -414,29 +438,72 @@ const BusinessDashboard = () => {
         {/* Applicants Tab */}
         {activeTab === 'applicants' && (
           <div className="tab-content">
-            <h2>Available Applicants</h2>
+            <h2>Available Applicants (Grouped by Job)</h2>
             {loading && <p>Loading applicants...</p>}
 
             {applicants.length === 0 ? (
               <p>No applicants available yet.</p>
             ) : (
-              <div className="applicants-grid">
-                {applicants.map(dev => (
-                  <div key={dev.id} className="applicant-card">
-                    <h3>{dev.first_name}</h3>
-                    <p><strong>Email:</strong> {dev.email}</p>
-                    {dev.developer_profile && (
-                      <>
-                        <p><strong>GitHub:</strong> {dev.developer_profile.github_account || 'Not provided'}</p>
-                        <p><strong>LinkedIn:</strong> {dev.developer_profile.linkedin_account || 'Not provided'}</p>
-                      </>
+              <div className="applicants-by-job">
+                {applicants.map(job => (
+                  <div key={`job-${job.id}`} className="job-applicants-section">
+                    <div className="job-header">
+                      <h3>{job.title}</h3>
+                      <p className="job-meta">{job.position || ''} <span className={`status-badge status-${job.status}`}>{job.status}</span></p>
+                    </div>
+
+                    {/* Render assigned developer and list of applicants under each job */}
+                    {((job.assigned_developer) || (job.applicants && job.applicants.length > 0) || (job.applicants_list && job.applicants_list.length > 0) || (job.developers && job.developers.length > 0)) ? (
+                      <div className="applicants-list">
+                        {/* show assigned developer first if present */}
+                        {job.assigned_developer && (
+                          <div className="applicant-card assigned-developer-card">
+                            <div className="applicant-top">
+                              {job.assigned_developer.developer_profile?.profile_picture && (
+                                <img src={job.assigned_developer.developer_profile.profile_picture} alt={job.assigned_developer.first_name} className="profile-picture-small" />
+                              )}
+                              <div>
+                                <p className="applicant-name">{job.assigned_developer.first_name} {job.assigned_developer.last_name || ''}</p>
+                                <p className="applicant-meta">{job.assigned_developer.email}</p>
+                              </div>
+                            </div>
+                            {job.assigned_developer.developer_profile && (
+                              <div className="applicant-meta">{job.assigned_developer.developer_profile.skills || job.assigned_developer.developer_profile.description}</div>
+                            )}
+                            <div className="applicant-actions">
+                              <button className="contact-btn" onClick={() => handleViewDeveloperProfile(job.assigned_developer.id)}>View Profile</button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* helper to pick the applicants array from possible response keys */}
+                        {((job.applicants && job.applicants.length > 0) ? job.applicants : (job.applicants_list && job.applicants_list.length > 0) ? job.applicants_list : (job.developers && job.developers.length > 0) ? job.developers : []).map((dev) => (
+                          <div key={dev.id} className="applicant-card">
+                            <div className="applicant-top">
+                              {dev.developer_profile?.profile_picture && (
+                                <img src={dev.developer_profile.profile_picture} alt={dev.first_name} className="profile-picture-small" />
+                              )}
+                              <div>
+                                <p className="applicant-name">{dev.first_name} {dev.last_name || ''}</p>
+                                <p className="applicant-meta">{dev.email}</p>
+                              </div>
+                            </div>
+
+                            {dev.developer_profile?.skills && (
+                              <p className="applicant-meta">{dev.developer_profile.skills}</p>
+                            )}
+
+                            <div className="applicant-actions">
+                              <button className="contact-btn" onClick={() => handleViewDeveloperProfile(dev.id)}>View Profile</button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="no-assigned">
+                        <p>No applicants available yet.</p>
+                      </div>
                     )}
-                    <button
-                      className="contact-btn"
-                      onClick={() => handleViewDeveloperProfile(dev.id)}
-                    >
-                      View Profile
-                    </button>
                   </div>
                 ))}
               </div>

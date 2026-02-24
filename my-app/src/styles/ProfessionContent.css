@@ -1,0 +1,387 @@
+/* Profession Content Page Styling */
+.profession-content-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.navbar {
+  background-color: #2c3e50;
+  color: white;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+  font-size: 20px;
+  font-weight: bold;
+  color: white;
+}
+
+.navbar-menu {
+  display: flex;
+  list-style: none;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-menu li button {
+  background: none;
+  border: none;
+  color: white;
+  padding: 16px 20px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.navbar-menu li button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.logout-btn {
+  background-color: #e74c3c !important;
+  color: white !important;
+  border-radius: 4px;
+  margin: 8px 0;
+  padding: 10px 20px !important;
+  margin-left: 20px;
+}
+
+.logout-btn:hover {
+  background-color: #c0392b !important;
+}
+
+.content-wrapper {
+  flex: 1;
+  padding: 40px 20px;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.coming-soon {
+  background: white;
+  border-radius: 12px;
+  padding: 60px 40px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.coming-soon h2 {
+  font-size: 48px;
+  color: #667eea;
+  margin: 0 0 20px 0;
+}
+
+.coming-soon p {
+  font-size: 18px;
+  color: #666;
+  margin: 10px 0;
+  line-height: 1.6;
+}
+
+.coming-soon strong {
+  color: #2c3e50;
+}
+
+.no-profession {
+  background: white;
+  border-radius: 12px;
+  padding: 60px 40px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.no-profession p {
+  font-size: 18px;
+  color: #666;
+}
+
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.tab-btn {
+  background: white;
+  border: 2px solid white;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #667eea;
+  border-radius: 8px;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tab-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: transparent;
+}
+
+.tab-content {
+  background: white;
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tab-content h2 {
+  color: #2c3e50;
+  margin: 0 0 10px 0;
+  border-bottom: 3px solid #667eea;
+  padding-bottom: 15px;
+}
+
+.tab-content .description {
+  color: #666;
+  font-size: 16px;
+  margin: 10px 0 30px 0;
+}
+
+.items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 25px;
+  margin-top: 30px;
+}
+
+.content-card {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 10px;
+  padding: 25px;
+  transition: all 0.3s;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.content-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.content-card h3 {
+  color: #2c3e50;
+  margin: 0;
+  font-size: 18px;
+  flex: 1;
+}
+
+.difficulty {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.difficulty.beginner {
+  background: #d4edda;
+  color: #155724;
+}
+
+.difficulty.intermediate {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.difficulty.advanced {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.date {
+  padding: 6px 14px;
+  background: white;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #667eea;
+  white-space: nowrap;
+}
+
+.content-card .description {
+  color: #555;
+  font-size: 14px;
+  margin: 10px 0;
+  flex-grow: 1;
+  line-height: 1.5;
+}
+
+.details {
+  background: white;
+  padding: 15px;
+  border-radius: 6px;
+  margin: 15px 0;
+  font-size: 13px;
+}
+
+.details p {
+  color: #666;
+  margin: 8px 0;
+}
+
+.details strong {
+  color: #2c3e50;
+}
+
+.action-btn {
+  display: inline-block;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s;
+  text-align: center;
+  margin-top: 15px;
+}
+
+.action-btn:hover {
+  transform: translateX(3px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* Exam Card Specific */
+.exam-card {
+  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+}
+
+/* Hackathon Card Specific */
+.hackathon-card {
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+}
+
+/* Quiz Card Specific */
+.quiz-card {
+  background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .content-wrapper {
+    padding: 20px 15px;
+  }
+
+  .tab-content {
+    padding: 20px;
+  }
+
+  .tab-content h2 {
+    font-size: 24px;
+  }
+
+  .items-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .content-card {
+    padding: 15px;
+  }
+
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tabs {
+    gap: 8px;
+  }
+
+  .tab-btn {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  .coming-soon {
+    padding: 40px 20px;
+  }
+
+  .coming-soon h2 {
+    font-size: 32px;
+  }
+
+  .coming-soon p {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    flex-direction: column;
+    padding: 10px;
+  }
+
+  .navbar-brand {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+
+  .navbar-menu {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .navbar-menu li button {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .logout-btn {
+    margin-left: 5px !important;
+    padding: 8px 12px !important;
+  }
+
+  .tab-content {
+    padding: 15px;
+  }
+
+  .items-grid {
+    gap: 12px;
+  }
+
+  .action-btn {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+}

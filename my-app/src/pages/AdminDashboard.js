@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { adminAPI } from '../services/api';
+import { adminAPI, jobAPI } from '../services/api';
 import '../styles/Dashboard.css';
 
 const AdminDashboard = () => {
   const { logout } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('home');
   const [developers, setDevelopers] = useState([]);
   const [clients, setClients] = useState([]);
@@ -13,18 +15,35 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [selectedDeveloper, setSelectedDeveloper] = useState(null);
   const [selectedClient, setSelectedClient] = useState(null);
+  const [jobs, setJobs] = useState([]);
   const [pointsModalOpen, setPointsModalOpen] = useState(false);
   const [pointsData, setPointsData] = useState({ proficiency: 0, courtesy: 0 });
 
   useEffect(() => {
     if (activeTab === 'developers') {
       fetchDevelopers();
+      fetchJobs();
     } else if (activeTab === 'clients') {
       fetchClients();
     } else if (activeTab === 'rankings') {
       fetchDevelopers();
     }
   }, [activeTab]);
+
+  const fetchJobs = async () => {
+    setLoading(true);
+    try {
+      const response = await jobAPI.getJobs();
+      // admin /jobs returns an array of jobs
+      const jobsList = Array.isArray(response.data) ? response.data : response.data.jobs || response.data || [];
+      setJobs(jobsList);
+    } catch (error) {
+      console.error('Error fetching jobs:', error);
+      setJobs([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchDevelopers = async () => {
     setLoading(true);
@@ -64,16 +83,6 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleAddJobToClient = async (developerId, clientId) => {
-    try {
-      await adminAPI.addJobToClient(developerId, clientId);
-      // Show success message
-      alert('Developer added to client page successfully!');
-    } catch (error) {
-      console.error('Error adding job to client:', error);
-      alert('Error adding job to client');
-    }
-  };
 
   const handleSearchDevelopers = (e) => {
     const query = e.target.value.toLowerCase();
@@ -142,6 +151,7 @@ const AdminDashboard = () => {
           <li><button className={activeTab === 'developers' ? 'active' : ''} onClick={() => setActiveTab('developers')}>Manage Developers</button></li>
           <li><button className={activeTab === 'rankings' ? 'active' : ''} onClick={() => setActiveTab('rankings')}>Developer Rankings</button></li>
           <li><button className={activeTab === 'clients' ? 'active' : ''} onClick={() => setActiveTab('clients')}>Manage Businesses</button></li>
+          <li><button onClick={() => navigate('/admin/profession-management')}>Manage Professions</button></li>
           <li><button onClick={handleLogout} className="logout-btn">Logout</button></li>
         </ul>
       </nav>
@@ -225,23 +235,35 @@ const AdminDashboard = () => {
             {selectedDeveloper && (
               <div className="modal-overlay" onClick={() => setSelectedDeveloper(null)}>
                 <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                  <h3>Manage Developer: {selectedDeveloper.first_name}</h3>
+                  <h3>Assign Developer: {selectedDeveloper.first_name}</h3>
                   <div className="modal-body">
-                    <p>Select a client to make this developer visible to:</p>
-                    <div className="client-selection">
-                      {clients.map(client => (
-                        <button
-                          key={client.id}
-                          className="selection-btn"
-                          onClick={() => {
-                            handleAddJobToClient(selectedDeveloper.id, client.id);
-                            setSelectedDeveloper(null);
-                          }}
-                        >
-                          {client.first_name} - {client.client_profile?.business_name}
-                        </button>
-                      ))}
-                    </div>
+                    <p>Select a job to assign this developer to:</p>
+                    {jobs.length === 0 ? (
+                      <p>No jobs available.</p>
+                    ) : (
+                      <div className="jobs-selection">
+                        {jobs.map(job => (
+                          <div key={job.id} className="job-selection-row">
+                            <div className="job-info">
+                              <strong>{job.title}</strong>
+                              <div className="job-client">{job.client?.business_name || job.client?.client_profile?.business_name || 'Business'}</div>
+                              <div className="job-meta">{job.position || ''} <span className={`status-badge status-${job.status}`}>{job.status}</span></div>
+                            </div>
+                            <div className="job-action">
+                              <button
+                                className="assign-btn"
+                                onClick={() => {
+                                  handleAssignDeveloper(job.id, selectedDeveloper.id);
+                                  setSelectedDeveloper(null);
+                                }}
+                              >
+                                Assign to this job
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <button className="close-btn" onClick={() => setSelectedDeveloper(null)}>Close</button>
                 </div>
@@ -295,21 +317,35 @@ const AdminDashboard = () => {
                 <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                   <h3>Manage Business: {selectedClient.client_profile?.business_name}</h3>
                   <div className="modal-body">
-                    <p>Select a developer to add to this business's applicant list:</p>
-                    <div className="developer-selection">
-                      {developers.map(dev => (
-                        <button
-                          key={dev.id}
-                          className="selection-btn"
-                          onClick={() => {
-                            handleAddJobToClient(dev.id, selectedClient.id);
-                            setSelectedClient(null);
-                          }}
-                        >
-                          {dev.first_name}
-                        </button>
-                      ))}
-                    </div>
+                    <p>Select a job for this business and choose a developer to assign:</p>
+                    {jobs.length === 0 ? (
+                      <p>No jobs available.</p>
+                    ) : (
+                      <div className="business-jobs-selection">
+                        {jobs.filter(j => (j.client?.id === selectedClient.client_profile?.id) || (j.client?.id === selectedClient.id) ).map(job => (
+                          <div key={`client-job-${job.id}`} className="job-selection-row">
+                            <div className="job-info">
+                              <strong>{job.title}</strong>
+                              <div className="job-meta">{job.position || ''} <span className={`status-badge status-${job.status}`}>{job.status}</span></div>
+                            </div>
+                            <div className="developer-selection-grid">
+                              {developers.map(dev => (
+                                <button
+                                  key={`assign-${job.id}-${dev.id}`}
+                                  className="selection-btn"
+                                  onClick={() => {
+                                    handleAssignDeveloper(job.id, dev.id);
+                                    setSelectedClient(null);
+                                  }}
+                                >
+                                  Assign {dev.first_name}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <button className="close-btn" onClick={() => setSelectedClient(null)}>Close</button>
                 </div>

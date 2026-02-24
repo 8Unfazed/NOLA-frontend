@@ -22,6 +22,17 @@ const DeveloperDashboard = () => {
     if (activeTab === 'jobs') {
       fetchAvailableJobs();
     }
+    // Poll available jobs when jobs tab is active
+    let pollId;
+    if (activeTab === 'jobs') {
+      pollId = setInterval(() => {
+        fetchAvailableJobs();
+      }, 10000);
+    }
+
+    return () => {
+      if (pollId) clearInterval(pollId);
+    };
   }, [activeTab]);
 
   const fetchDeveloperProfile = async () => {
@@ -41,10 +52,9 @@ const DeveloperDashboard = () => {
     setLoading(true);
     try {
       const response = await developerAPI.getJobs();
-      // backend now returns { jobs: [...], clients: [...] } for developers
+      // backend now returns { jobs: [...] } for developers
       const data = response.data || {};
       setJobs(data.jobs || []);
-      setClients(data.clients || []);
     } catch (error) {
       console.error('Error fetching jobs:', error);
     } finally {
@@ -86,6 +96,8 @@ const DeveloperDashboard = () => {
           <li><button className={activeTab === 'home' ? 'active' : ''} onClick={() => setActiveTab('home')}>Home</button></li>
           <li><button className={activeTab === 'profile' ? 'active' : ''} onClick={() => setActiveTab('profile')}>Personal Details</button></li>
           <li><button className={activeTab === 'jobs' ? 'active' : ''} onClick={() => setActiveTab('jobs')}>Available Jobs</button></li>
+          <li><button onClick={() => navigate('/profession-content')}>Learning Resources</button></li>
+          <li><button onClick={() => navigate('/improve-skill')}>Improve Skill</button></li>
           <li><button onClick={handleLogout} className="logout-btn">Logout</button></li>
         </ul>
       </nav>
@@ -290,125 +302,92 @@ const DeveloperDashboard = () => {
         {/* Jobs Tab */}
         {activeTab === 'jobs' && (
           <div className="tab-content">
-            <h2>Available Jobs & Businesses</h2>
-            {loading && <p>Loading jobs...</p>}
+            <h2>Your Assigned Job</h2>
+            {loading && <p>Loading job...</p>}
 
-            {(jobs.length === 0 && clients.length === 0) ? (
-              <p>No jobs available yet.</p>
+            {jobs.length === 0 ? (
+              <p>No job assigned to you yet.</p>
             ) : (
-              <div className="jobs-by-business">
-                {/* Display jobs grouped by business */}
-                {(() => {
-                  // Group jobs by client_id
-                  const jobsByBusiness = {};
-                  jobs.forEach(job => {
-                    const businessId = job.client?.id;
-                    if (businessId) {
-                      if (!jobsByBusiness[businessId]) {
-                        jobsByBusiness[businessId] = {
-                          business: job.client,
-                          jobs: []
-                        };
-                      }
-                      jobsByBusiness[businessId].jobs.push(job);
-                    }
-                  });
-
-                  // Convert to array and render
-                  return Object.entries(jobsByBusiness).map(([businessId, data]) => (
-                    <div key={`business-${businessId}`} className="business-jobs-section">
-                      <div className="business-header">
-                        {data.business.business_logo && (
-                          <img 
-                            src={data.business.business_logo} 
-                            alt={data.business.business_name}
-                            className="business-logo-small"
-                          />
-                        )}
-                        <div className="business-info">
-                          <h3>{data.business.business_name || 'Business'}</h3>
-                          <p className="business-category">{data.business.business_category || 'No category'}</p>
-                        </div>
-                        <button 
-                          className="view-business-btn"
-                          onClick={() => navigate(`/business-profile/${data.business.id}`)}
-                        >
-                          View Business
-                        </button>
-                      </div>
-
-                      <div className="jobs-list">
-                        {data.jobs.map(job => (
-                          <div key={`job-${job.id}`} className="job-card-in-business">
-                            <div className="job-card-title">
-                              <h4>{job.title}</h4>
-                              {job.position && <p className="job-position">{job.position}</p>}
-                            </div>
-                            
-                            <div className="job-card-meta">
-                              {job.contract_type && (
-                                <span className="meta-badge">{job.contract_type}</span>
-                              )}
-                              {job.location_type && (
-                                <span className="meta-badge">{job.location_type}</span>
-                              )}
-                              {job.hours_per_week && (
-                                <span className="meta-badge">{job.hours_per_week}h/week</span>
-                              )}
-                              <span className={`status-badge status-${job.status}`}>{job.status}</span>
-                            </div>
-
-                            {job.description && (
-                              <p className="job-description-preview">
-                                {job.description.substring(0, 120)}...
-                              </p>
-                            )}
-
-                            <div className="job-card-footer">
-                              <button 
-                                className="view-details-btn"
-                                onClick={() => setSelectedJob(job)}
-                              >
-                                View Full Details
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+              <div className="jobs-list">
+                {jobs.map(job => (
+                  <div key={`job-${job.id}`} className="job-card">
+                    <div className="job-card-header">
+                      <h3>{job.title}</h3>
+                      {job.position && <p className="job-position">{job.position}</p>}
                     </div>
-                  ));
-                })()}
+                    
+                    <div className="job-card-meta">
+                      {job.contract_type && (
+                        <span className="meta-badge">{job.contract_type}</span>
+                      )}
+                      {job.location_type && (
+                        <span className="meta-badge">{job.location_type}</span>
+                      )}
+                      {job.hours_per_week && (
+                        <span className="meta-badge">{job.hours_per_week}h/week</span>
+                      )}
+                      <span className={`status-badge status-${job.status}`}>{job.status}</span>
+                    </div>
 
-                {/* Display standalone businesses with no jobs */}
-                {clients.length > 0 && (
-                  <div className="business-jobs-section">
-                    <h3 className="section-title">Other Businesses</h3>
-                    <div className="standalone-businesses">
-                      {clients.map(client => (
-                        <div key={`client-${client.id}`} className="business-card-standalone">
-                          {client.business_logo && (
-                            <img 
-                              src={client.business_logo} 
-                              alt={client.business_name}
-                              className="business-logo-medium"
-                            />
-                          )}
-                          <h4>{client.business_name || 'Business'}</h4>
-                          <p className="business-category">{client.business_category || 'No category'}</p>
-                          {client.business_description && (
-                            <p className="business-description">{client.business_description.substring(0, 100)}...</p>
-                          )}
-                          <button 
-                            className="view-business-btn-standalone"
-                            onClick={() => navigate(`/business-profile/${client.id}`)}
-                          >
-                            View Business
-                          </button>
-                        </div>
-                      ))}
+                    {job.description && (
+                      <div className="job-description">
+                        <h4>Description</h4>
+                        <p>{job.description}</p>
+                      </div>
+                    )}
+
+                    {job.roles_and_responsibilities && job.roles_and_responsibilities.length > 0 && (
+                      <div className="job-section">
+                        <h4>Roles & Responsibilities</h4>
+                        <ul>
+                          {job.roles_and_responsibilities.map((role, idx) => (
+                            <li key={idx}>{role}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {job.requirements && job.requirements.length > 0 && (
+                      <div className="job-section">
+                        <h4>Requirements</h4>
+                        <ul>
+                          {job.requirements.map((req, idx) => (
+                            <li key={idx}>{req}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {job.desired_skills && job.desired_skills.length > 0 && (
+                      <div className="job-section">
+                        <h4>Desired Skills</h4>
+                        <ul>
+                          {job.desired_skills.map((skill, idx) => (
+                            <li key={idx}>{skill}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {job.client && (
+                      <div className="job-client-info">
+                        <h4>Posted by: {job.client.business_name || 'Business'}</h4>
+                        {job.client.business_description && (
+                          <p>{job.client.business_description}</p>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="job-card-footer">
+                      <button 
+                        className="view-details-btn"
+                        onClick={() => setSelectedJob(job)}
+                      >
+                        View Full Details
+                      </button>
                     </div>
                   </div>
-                )}
+                ))}
               </div>
             )}
 

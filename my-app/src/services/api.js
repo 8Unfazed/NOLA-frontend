@@ -50,8 +50,6 @@ export const adminAPI = {
   getClients: () => api.get('/admin/clients'),
   assignDeveloper: (jobId, developerId) => 
     api.post('/admin/assign_developer', { job_id: jobId, developer_id: developerId }),
-  addJobToClient: (developerId, clientId) =>
-    api.post('/admin/add_job_to_client', { developer_id: developerId, client_id: clientId }),
   addDeveloperPoints: (developerId, proficiencyPoints, courtesyPoints) =>
     api.post('/admin/developer_points', { 
       developer_id: developerId, 
@@ -65,6 +63,30 @@ export const jobAPI = {
   createJob: (data) => api.post('/jobs', data),
   updateJob: (jobId, data) => api.patch(`/jobs/${jobId}`, data),
   deleteJob: (jobId) => api.delete(`/jobs/${jobId}`),
+};
+
+export const professionAPI = {
+  // Professions
+  getAllProfessions: () => api.get('/professions'),
+  getProfession: (professionId) => api.get(`/professions/${professionId}`),
+  createProfession: (data) => api.post('/professions', data),
+  updateProfession: (professionId, data) => api.put(`/professions/${professionId}`, data),
+  deleteProfession: (professionId) => api.delete(`/professions/${professionId}`),
+
+  // Exam Links
+  addExamLink: (professionId, data) => api.post(`/professions/${professionId}/exam_links`, data),
+  updateExamLink: (professionId, examId, data) => api.put(`/professions/${professionId}/exam_links/${examId}`, data),
+  deleteExamLink: (professionId, examId) => api.delete(`/professions/${professionId}/exam_links/${examId}`),
+
+  // Hackathons
+  addHackathon: (professionId, data) => api.post(`/professions/${professionId}/hackathons`, data),
+  updateHackathon: (professionId, hackathonId, data) => api.put(`/professions/${professionId}/hackathons/${hackathonId}`, data),
+  deleteHackathon: (professionId, hackathonId) => api.delete(`/professions/${professionId}/hackathons/${hackathonId}`),
+
+  // Code Quizzes
+  addCodeQuiz: (professionId, data) => api.post(`/professions/${professionId}/code_quizzes`, data),
+  updateCodeQuiz: (professionId, quizId, data) => api.put(`/professions/${professionId}/code_quizzes/${quizId}`, data),
+  deleteCodeQuiz: (professionId, quizId) => api.delete(`/professions/${professionId}/code_quizzes/${quizId}`),
 };
 
 export default api;
